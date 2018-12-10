@@ -301,17 +301,22 @@ S3Zipper.prototype = {
 
             if (r && r.zippedFiles && r.zippedFiles.length) {
                 t.uploadLocalFileToS3( params.zipFileName, params.s3ZipFileName, function (err, result) {
-                    callback(null, {
-                        zipFileETag: result.ETag,
-                        zipFileLocation: result.Location,
-                        zippedFiles: r.zippedFiles
+                    fs.unlink(params.zipFileName, function(erro) {
+                        if (err || erro) {
+                          callback(err || erro);
+                          return;
+                        }
+                        callback(null, {
+                            zipFileETag: result.ETag,
+                            zipFileLocation: result.Location,
+                            zippedFiles: r.zippedFiles
+                        });
                     });
-                    fs.unlink(params.zipFileName);
                 });
             }
             else {
                 console.log('no files zipped. nothing to upload');
-                fs.unlink(params.zipFileName);
+                fs.unlink(params.zipFileName, function(err) {} );
                 callback(null, {
                     zipFileETag: null,
                     zipFileLocation: null,
