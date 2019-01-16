@@ -195,7 +195,6 @@ S3Zipper.prototype = {
                 console.error(err);
             else {
                 var files = clearedFiles.files;
-                console.log("files", files);
                 async.map(files, function (f, callback) {
                     t.s3bucket.getObject({Bucket: t.awsConfig.bucket, Key: f.Key}, function (err, data) {
                         if (err)
@@ -298,14 +297,9 @@ S3Zipper.prototype = {
 
 
         this.zipToFile(params, function (err, r) {
-            console.log("zip to file returned", err, r);
             if (r && r.zippedFiles && r.zippedFiles.length) {
                 t.uploadLocalFileToS3( params.zipFileName, params.s3ZipFileName, function (err, result) {
-                    console.log("go to unlink", result);
                     fs.unlinkSync(params.zipFileName, function(err) {console.error("error", err);} );
-                    console.log("got out of unlink");
-//                    fs.unlink(params.zipFileName, function(erro) {
-//                        console.log("unlink returned: error:", erro);
                         if (err) {
                           callback(err);
                           return;
@@ -315,7 +309,6 @@ S3Zipper.prototype = {
                             zipFileLocation: result.Location,
                             zippedFiles: r.zippedFiles
                         });
-//                    });
                 });
             }
             else {
@@ -360,7 +353,7 @@ S3Zipper.prototype = {
 
         var t = this;
         ///local file
-        params.zipFileName = '__' + Date.now() + '.zip';
+        params.zipFileName = '/tmp/' + '__' + Date.now() + '.zip';
 
         if (params.s3ZipFileName.indexOf('/') < 0)
             params.s3ZipFileName = params.s3FolderName + "/" + params.s3ZipFileName;
@@ -391,7 +384,7 @@ S3Zipper.prototype = {
                 if (uploadResult) {
                     result.uploadedFile = uploadResult;
                     console.log('remove temp file ', localFragName);
-                    fs.unlink(localFragName);
+                    fs.unlinkSync(localFragName);
                 }
                 pendingUploads--;
                 if (pendingUploads == 0 && finalResult) {
@@ -492,7 +485,7 @@ S3Zipper.prototype = {
                 fileStream.close();
                 if (result.zippedFiles.length == 0) /// its an empty zip file get rid of it
 
-                    fs.unlink(fragFileName);
+                    fs.unlinkSync(fragFileName);
 
                 else
                     events.onFileZipped(fragFileName, result);
