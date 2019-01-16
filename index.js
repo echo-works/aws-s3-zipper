@@ -298,9 +298,12 @@ S3Zipper.prototype = {
 
 
         this.zipToFile(params, function (err, r) {
+            console.log("zip to file returned", err, r);
             if (r && r.zippedFiles && r.zippedFiles.length) {
                 t.uploadLocalFileToS3( params.zipFileName, params.s3ZipFileName, function (err, result) {
+                    console.log("go to unlink", result);
                     fs.unlinkSync(params.zipFileName, function(err) {console.error("error", err);} );
+                    console.log("got out of unlink");
 //                    fs.unlink(params.zipFileName, function(erro) {
 //                        console.log("unlink returned: error:", erro);
                         if (err) {
@@ -317,7 +320,7 @@ S3Zipper.prototype = {
             }
             else {
                 console.log('no files zipped. nothing to upload');
-                fs.unlinkSync(params.zipFileName);
+                fs.unlink(params.zipFileName, function(err) {} );
                 callback(null, {
                     zipFileETag: null,
                     zipFileLocation: null,
